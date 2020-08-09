@@ -4,27 +4,43 @@ const connection = mysql.createConnection({
   host: 'localhost',
   port: 3306,
   // Your MySQL username
-  user: 'root',
+  user: 'local',
   // Your MySQL password
-  password: '',
-  database: 'ice_creamDB'
+  password: '12345',
+  database: 'employeeDB'
 });
 
-connection.connect(err => {
+connection.connect(function (err) {
   if (err) throw err;
-  console.log('connected as id ' + connection.threadId + '\n');
-  createProduct();
-});
+})
 
-createProduct = () => {
-  console.log('Inserting a new product...\n');
+module.exports = connection;
+
+/*
+
+function viewEmployees() {
+  //'SELECT * FROM employees'
+  const sql = `SELECT * FROM employees`;
+  const params = [];
+  db.all(sql, params, (err, rows) => {
+    if (err) {
+      console.log({ error: err.message });
+      return;
+    }
+    console.table(rows);
+  })
+    .then(function () {
+      //call repeat here?
+      return startNewPrompt();
+    }
+    )
+};
+
+
+viewEmployees = () => {
   const query = connection.query(
-    'INSERT INTO products SET ?',
-    {
-      flavor: 'Rocky Road',
-      price: 3.0,
-      quantity: 50
-    },
+    `SELECT * FROM employees`,
+
     function (err, res) {
       if (err) throw err;
       console.log(res.affectedRows + ' product inserted!\n');
@@ -33,8 +49,11 @@ createProduct = () => {
     }
   );
   // logs the actual query being run
-  console.log(query.sql);
+  console.table(rows);
 };
+
+
+
 
 updateProduct = () => {
   console.log('Updating all Rocky Road quantities...\n');
@@ -87,9 +106,9 @@ readProducts = () => {
   });
 };
 
+module.export = new EmployeeDatabase(connection)
 
-
-
+*/
 
 
 

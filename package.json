@@ -2,13 +2,9 @@
   "name": "employee-tracker",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
-    "test": "jest",
-    "migrate": "sqlite3 db/election.db < db/schema.sql",
-    "seed": "sqlite3 db/election.db < db/seeds.sql",
-    "db": "sqlite3 db/election.db",
-    "start": "nodemon server.js"
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -23,7 +19,7 @@
   "homepage": "https://github.com/jennifermulder/employee-tracker#readme",
   "dependencies": {
     "console.table": "^0.10.0",
-    "express": "^4.17.1",
+    "inquirer": "^7.3.3",
     "mysql2": "^2.1.0"
   }
 }

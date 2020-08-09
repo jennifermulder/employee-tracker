@@ -24,5 +24,5 @@ VALUES
   ('Malia', 'Brown', 5, 0),
   ('Sarah', 'Lourd', 6, 0),
   ('Tom', 'Allen', 7, 6),
-  ('Christian', 'Eckenrode', 8, 7),
+  ('Christian', 'Eckenrode', 3, 7),
   
