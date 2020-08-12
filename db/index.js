@@ -4,11 +4,27 @@ class EmployeeDatabase {
   constructor(connection) {
     this.connection = connection;
   }
+
   //methods
-  viewEmployees() {
+  getDepartments() {
+    return this.connection.promise().query(
+      "SELECT * FROM department"
+    );
+  };
+
+  getRoles() {
+    return this.connection.promise().query(
+      `SELECT role.id, role.title, department.name AS department, role.salary
+                FROM role
+                LEFT JOIN department 
+                ON role.department_id = department.id`
+    );
+  };
+
+  getEmployees() {
     return this.connection.promise().query(
       //"SELECT * FROM employees" 
-      `SELECT employee.id, employee.first_name, role.title, department.name, role.salary, employee.manager_id
+      `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary, employee.manager_id AS manager
                 FROM employee 
                 LEFT JOIN role 
                 ON employee.role_id = role.id
@@ -16,37 +32,29 @@ class EmployeeDatabase {
                 ON role.department_id = department.id`
     );
   };
-
-  getRoles() {
-    return this.connection.promise().query(
-      "SELECT * FROM role"
-    );
-  };
-
-  getDepartments() {
-    return this.connection.promise().query(
-      "SELECT * FROM department"
-    );
-  };
-
+  //used in add employee
   getManager() {
     return this.connection.promise().query(
       "SELECT * FROM employee"
     );
   };
 
-  viewEmployeesByDepartment() {
+  //res.name
+  addDepartment(name) {
     return this.connection.promise().query(
-      "SELECT * FROM employees GROUP BY department_id"
-    );
+      `INSERT INTO department (name) 
+        VALUES (?)`
+      //name to replace "?"
+      , name)
   };
 
-  viewEmployeesByManagert() {
+  addRole(title, salary, department_id) {
     return this.connection.promise().query(
-      "SELECT * FROM employees GROUP BY manager_id"
-    );
+      `INSERT INTO role (title, salary, department_id) 
+        VALUES (?,?,?)`
+      //to replace "?"
+      , [title, salary, department_id])
   };
-
 
   //view all departments: department names, department ids
   //view all roles: job title, role id, department for role, salary
@@ -65,41 +73,44 @@ class EmployeeDatabase {
       , [first_name, last_name, role_id, manager_id])
   };
 
-  //res.name
-  addDepartment(name) {
-    return this.connection.promise().query(
-      `INSERT INTO department (name) 
-        VALUES (?)`
-      //name to replace "?"
-      , name)
-  };
-
-
-
-
-  removeEmployee() {
-    return this.connection.promise().query(
-
-    );
-  };
-
   updateRole() {
     return this.connection.promise().query(
-
-    );
+      `SET role_id = (role_id)
+      WHERE id = (?)`
+      // to replace "?"
+      , role_id)
   };
 
-  updateManager() {
-    return this.connection.promise().query(
 
-    );
-  };
+  //BONUS
+  // updateManager() {
+  //   return this.connection.promise().query(
 
-  viewRoles() {
-    return this.connection.promise().query(
+  //   );
+  // };
 
-    );
-  };
+  // viewEmployeesByManager() {
+  //   return this.connection.promise().query(
+  //     "SELECT * FROM employees GROUP BY manager_id"
+  //   );
+  // };
+
+  // viewEmployeesByDepartment() {
+  //   return this.connection.promise().query(
+  //     "SELECT * FROM employees GROUP BY department_id"
+  //   );
+  // };
+
+  // deleteDepartment
+
+  // deleteRole
+
+  // deleteEmployee
+
+  // view the total combined salaries in a department
+
+  //   );
+  // };
 };
 
 module.exports = new EmployeeDatabase(connection)
