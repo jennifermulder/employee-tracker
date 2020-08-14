@@ -2,17 +2,15 @@
 const db = require('./db');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
-const { promise } = require('./db/database');
 
-//prompt user what they want to do
+//prompt user
 const startNewPrompt = () => {
   console.log("start")
   inquirer.prompt([{
     type: 'list',
     name: 'initialPrompt',
     message: 'What would you like to do?',
-    //update to proper prompts
-    choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role'],
+    choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role', 'Update an employee manager', 'View employees by manager', 'View employees by department', 'Delete a department', 'Delete a role', 'Delete an employee'],
   }])
     .then(answer => {
       if (answer.initialPrompt == 'View all departments') {
@@ -36,11 +34,23 @@ const startNewPrompt = () => {
       } else if (answer.initialPrompt == 'Update an employee role') {
         return updateRole();
 
-        // } else if (answer.initialPrompt == 'Update employee Manager') {
-        //   return updateManager();
+      } else if (answer.initialPrompt == 'Update an employee manager') {
+        return updateManager();
 
-        // } else if (answer.initialPrompt == 'View all Roles') {
-        //   return viewRoles();
+      } else if (answer.initialPrompt == 'View employees by manager') {
+        return viewByManager();
+
+      } else if (answer.initialPrompt == 'View employees by department') {
+        return viewByDepartment();
+
+      } else if (answer.initialPrompt == 'Delete a department') {
+        return deleteDepartment();
+
+      } else if (answer.initialPrompt == 'Delete a role') {
+        return deleteRole();
+
+      } else if (answer.initialPrompt == 'Delete an employee') {
+        return deleteEmployee();
 
       } else {
         console.log('Please select an action!');
@@ -156,17 +166,16 @@ function addEmployee() {
         }
       ])
     }
-      //destructure result object to FN, LM, etc.
+      //destructure result object to FN, LM, RP, MP 
     ).then(({ first_name, last_name, rolePrompt, managerPrompt }) => {
-      // CREATE a department
+      // CREATE an employee
       db.addEmployee(first_name, last_name, rolePrompt, managerPrompt)
       console.log("The employee has been added!")
       startNewPrompt()
     })
 }
 
-//update to get list of employees to be able to choose from employee list
-//ask which role to change to to use as input " update role x where employee is = to . SET ROLE TO, WHERE EMPLOYEE IS EQUAL TO"
+//ask which role to change to to use as input
 function updateRole() {
   //pass one array in
   db.getEmployees()
@@ -178,46 +187,169 @@ function updateRole() {
           message: "Which employee do you want to update?",
           //map each with name as display, value as return value. Map with employee object array
           choices: employees.map(employee => ({ name: `${employee.first_name} ${employee.last_name}`, value: employee.id })),
-        }])
-      //??
-    }).then((employeePrompt) => {
-      return db.getRoles()
-    }).then(([roles]) => {
+        }
+      ])
+        .then(res => {
+          let employee_id = res.employeePrompt;
+          db.getRoles()
+            .then(([roles]) => {
+              inquirer.prompt([
+                {
+                  type: 'list',
+                  name: 'rolePrompt',
+                  message: "What role do you want to update the employee to?",
+                  //map each with name as display, value as return value
+                  choices: roles.map(role => ({ name: role.title, value: role.id })),
+                }
+              ])
+                .then(res => db.updateRole(employee_id, res.rolePrompt))
+                .then(() => console.log("The employee's role has been updated!"))
+                .then(() => startNewPrompt())
+
+            });
+        });
+    });
+};
+
+//ask which role to change to to use as input
+function updateManager() {
+  //pass one array in
+  db.getEmployees()
+    .then(([employees]) => {
       inquirer.prompt([
         {
           type: 'list',
-          name: 'rolePrompt',
-          message: "What role do you want to update the employee to?",
+          name: 'employeePrompt',
+          message: "Which employee do you want to update?",
+          //map each with name as display, value as return value. Map with employee object array
+          choices: employees.map(employee => ({ name: `${employee.first_name} ${employee.last_name}`, value: employee.id })),
+        }
+      ])
+        .then(res => {
+          let employee_id = res.employeePrompt;
+          db.getEmployees()
+            .then(([employees]) => {
+              inquirer.prompt([
+                {
+                  type: 'list',
+                  name: 'managerPrompt',
+                  message: "Which manager do you want to update the employee to?",
+                  //map each with name as display, value as return value
+                  choices: employees.map(employee => ({ name: `${employee.first_name} ${employee.last_name}`, value: employee.manager_id })),
+                }
+              ])
+                .then(res => db.updateManager(employee_id, res.managerPrompt))
+                .then(() => console.log("The employee's manager has been updated!"))
+                .then(() => startNewPrompt())
+
+            });
+        });
+    });
+};
+
+function viewByDepartment() {
+  //pass one array in
+  db.getDepartments()
+    .then(([departments]) => {
+      return inquirer.prompt([
+        {
+          type: 'list',
+          name: 'departmentPrompt',
+          message: "Which department do you want to view employees for?",
           //map each with name as display, value as return value
-          choices: roles.map(role => ({ name: role.title, value: role.id })),
-        }])
-    }).then(({ employeePrompt, rolePrompt }) => {
-      // Update role
-      db.updateRole(employeePrompt, rolePrompt)
-      console.log("The employee's role has been updated!")
+          choices: departments.map(department => ({ name: department.name, value: department.id })),
+        },
+      ])
+    },
+    ).then(res => {
+      db.viewByDepartment(res.departmentPrompt)
+        .then(
+          startNewPrompt())
+    })
+};
+
+function viewByManager() {
+  //pass one array in
+  db.getEmployees()
+    .then(([employees]) => {
+      return inquirer.prompt([
+        {
+          type: 'list',
+          name: 'managerPrompt',
+          message: "Which manager do you want to view employees for?",
+          //map each with name as display, value as return value
+          choices: employees.map(employee => ({ name: `${employee.first_name} ${employee.last_name}`, value: employee.manager_id })),
+        },
+      ])
+    },
+    ).then(res => {
+      db.viewByManager(res.managerPrompt)
+      startNewPrompt()
+    })
+};
+
+function deleteDepartment() {
+  //pass one array in
+  db.getDepartments()
+    .then(([departments]) => {
+      return inquirer.prompt([
+        {
+          type: 'list',
+          name: 'departmentPrompt',
+          message: "Which department do you want to delete?",
+          //map each with name as display, value as return value
+          choices: departments.map(department => ({ name: department.name, value: department.id })),
+        },
+      ])
+    },
+    ).then(({ departmentPrompt }) => {
+      db.deleteDepartment(departmentPrompt)
+      console.log("The department has been deleted!")
       startNewPrompt()
     })
 }
 
-//updateManager() {
-//   return this.connection.promise().query(
+function deleteRole() {
+  //pass one array in
+  db.getRoles()
+    .then(([roles]) => {
+      return inquirer.prompt([
+        {
+          type: 'list',
+          name: 'rolePrompt',
+          message: "Which role do you want to delete?",
+          //map each with name as display, value as return value
+          choices: roles.map(role => ({ name: role.name, value: role.id })),
+        },
+      ])
+    },
+    ).then(({ rolePrompt }) => {
+      db.deleteRole(rolePrompt)
+      console.log("The role has been deleted!")
+      startNewPrompt()
+    })
+}
 
-//   );
-// };
-
-// viewEmployeesByManager() {
-//  'SELECT * FROM employees, group by manager_id'
-// };
-
-// viewEmployeesByDepartment() {
-//  'SELECT * FROM employees, group by department_id'
-// };
-
-// deleteDepartment
-
-// deleteRole
-
-// deleteEmployee
+function deleteEmployee() {
+  //pass one array in
+  db.getEmployees()
+    .then(([employees]) => {
+      return inquirer.prompt([
+        {
+          type: 'list',
+          name: 'employeePrompt',
+          message: "Which employee do you want to delete?",
+          //map each with name as display, value as return value
+          choices: employees.map(employee => ({ name: employee.name, value: employee.id })),
+        },
+      ])
+    },
+    ).then(({ employeePrompt }) => {
+      db.deleteRole(employeePrompt)
+      console.log("The employee has been deleted!")
+      startNewPrompt()
+    })
+}
 
 // view the total combined salaries in a department
 
