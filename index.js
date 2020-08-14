@@ -251,7 +251,6 @@ function viewByDepartment() {
   //pass one array in
   db.getDepartments()
     .then(([departments]) => {
-      console.log([departments])
       return inquirer.prompt([
         {
           type: 'list',
@@ -263,10 +262,12 @@ function viewByDepartment() {
       ])
     },
     ).then(department_res => {
-      console.log(department_res)
       db.viewByDepartment(department_res.departmentPrompt)
-        .then(
-          startNewPrompt())
+        .then(([rows]) => {
+          let departments = rows;
+          console.log("\n");
+          console.table(departments);
+        }).then(() => startNewPrompt());
     })
 };
 
@@ -274,11 +275,10 @@ function viewByManager() {
   //pass one array in
   db.getEmployees()
     .then(([employees]) => {
-      console.log([employees])
       return inquirer.prompt([
         {
           type: 'list',
-          name: 'manager_id',
+          name: 'managerPrompt',
           message: "Which manager do you want to view employees for?",
           //map each with name as display, value as return value
           choices: employees.map(employee => ({ name: `${employee.first_name} ${employee.last_name}`, value: employee.id })),
@@ -286,9 +286,12 @@ function viewByManager() {
       ])
     },
     ).then(manager_res => {
-      console.log(manager_res.manager_id)
-      db.viewByManager(manager_res.manager_id)
-      // startNewPrompt()
+      db.viewByManager(manager_res.managerPrompt)
+        .then(([rows]) => {
+          let employees = rows;
+          console.log("\n");
+          console.table(employees);
+        }).then(() => startNewPrompt());
     })
 };
 

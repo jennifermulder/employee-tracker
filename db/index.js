@@ -83,7 +83,6 @@ class EmployeeDatabase {
   };
 
   viewByManager(manager_id) {
-    console.log(manager_id)
     return this.connection.promise().query(
       `SELECT employee.id, employee.first_name, employee.last_name, department.name AS department, role.title 
         FROM employee 
@@ -93,7 +92,6 @@ class EmployeeDatabase {
         ON department.id = role.department_id 
         WHERE manager_id = ?`,
       manager_id)
-    console.log(manager_id)
   };
 
   viewByDepartment(department_id) {
@@ -104,7 +102,7 @@ class EmployeeDatabase {
         ON role.id = employee.role_id 
         LEFT JOIN department 
         ON department.id = role.department_id 
-        WHERE department.id = ?;`,
+        WHERE department.id = ?`,
       department_id)
   };
 
