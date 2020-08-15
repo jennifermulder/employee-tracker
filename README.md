@@ -1,9 +1,9 @@
 # employee-tracker
 
-![](dist/assets/images/employeetracker.jpg)
+![](assets/images/employeetracker.jpg)
 
 ## Tutorial
-X
+https://drive.google.com/file/d/1akaFbJ3dzvyF39kYe5NTJgAXxYTHZ6E3/view
 
 ## Purpose
 To provide the user with an efficient solution to view and manage a company's departments, roles, and employees by simply answering questions when prompted from the command line.
