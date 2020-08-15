@@ -326,7 +326,7 @@ function deleteRole() {
           name: 'rolePrompt',
           message: "Which role do you want to delete?",
           //map each with name as display, value as return value
-          choices: roles.map(role => ({ name: role.name, value: role.id })),
+          choices: roles.map(role => ({ name: role.title, value: role.id })),
         },
       ])
     },
@@ -347,12 +347,12 @@ function deleteEmployee() {
           name: 'employeePrompt',
           message: "Which employee do you want to delete?",
           //map each with name as display, value as return value
-          choices: employees.map(employee => ({ name: employee.name, value: employee.id })),
+          choices: employees.map(employee => ({ name: `${employee.first_name} ${employee.last_name}`, value: employee.id })),
         },
       ])
     },
     ).then(({ employeePrompt }) => {
-      db.deleteRole(employeePrompt)
+      db.deleteEmployee(employeePrompt)
       console.log("The employee has been deleted!")
       startNewPrompt()
     })
